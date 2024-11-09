@@ -3,6 +3,7 @@ const app = express()
 
 app.use(express.json())
 
+/* Alustetaan puhelinluettelo */
 let phonebook = [
   { 
     "name": "Arto Hellas", 
@@ -26,14 +27,17 @@ let phonebook = [
   }
 ]
 
+/* Juuresta saadaan vastauksena Hello World! */
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/numbers', (request, response) => {
+/* Puhelinluettelon tiedot */
+app.get('/api/persons', (request, response) => {
   response.json(phonebook)
 })
 
+/* Info-sivu */
 app.get('/info', (request, response) => {
   const phonebookLength = phonebook.length
   const presentTime = new Date()
@@ -43,17 +47,62 @@ app.get('/info', (request, response) => {
   )
 })
 
-app.get('/api/numbers/:id', (request, response) => {
+/* Yksittäisen henkilön tiedot */
+app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
-  const number = phonebook.find(number => number.id === id)
+  const person = phonebook.find(person => person.id === id)
 
-  if (number) {
-    response.json(number)/*Pew pew*/
+  if (person) {
+    response.json(person)/*Pew pew*/
   } else {
     response.status(404).end()
   }
 })
 
+/* Poistetaan yksittäinen henkilö */
+app.delete('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  phonebook = phonebook.filter(person => person.id !== id)
+
+  response.status(204).end()
+})
+
+/* Luodaan satunnainen ID-numero väliltä 1024 - 8192 ja tarkistetaan, että sitä ei ole jo*/
+const generateId = () => {
+  let newId
+  /* Generoidaan uusi ID */
+  do {
+    newId = Math.floor(Math.random() * (8192 - 1024 + 1)) + 1024
+  } while (phonebook.some(person => person.id === String(newId))) /* Tarkistetaan, että ID ei ole jo olemassa */
+  return String(newId)
+}
+
+/* Lisätään uusi henkilö */
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  /* Tarkistetaan, että nimi ja numero on annettu */
+  if (!body.name || !body.number) {
+    return response.status(400).json({ 
+      error: 'content missing' 
+    })
+  }
+
+  /* Luodaan uusi henkilö */
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId(),
+  }
+
+  /* Lisätään henkilö puhelinluetteloon */
+  phonebook = phonebook.concat(person) 
+
+  /* Vastataan uudella henkilöllä */
+  response.json(phonebook)
+})
+
+/* Portti */
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
