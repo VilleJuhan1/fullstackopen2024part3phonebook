@@ -34,6 +34,26 @@ app.get('/api/numbers', (request, response) => {
   response.json(phonebook)
 })
 
+app.get('/info', (request, response) => {
+  const phonebookLength = phonebook.length
+  const presentTime = new Date()
+  response.send(
+    `<p>Phonebook has info for ${phonebookLength} people</p>
+     <p>${presentTime}</p>`
+  )
+})
+
+app.get('/api/numbers/:id', (request, response) => {
+  const id = request.params.id
+  const number = phonebook.find(number => number.id === id)
+
+  if (number) {
+    response.json(number)/*Pew pew*/
+  } else {
+    response.status(404).end()
+  }
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
