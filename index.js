@@ -52,8 +52,9 @@ app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
   const person = phonebook.find(person => person.id === id)
 
+  /* Jos henkilö löytyy, palautetaan tiedot, muuten 404 */
   if (person) {
-    response.json(person)/*Pew pew*/
+    response.json(person)
   } else {
     response.status(404).end()
   }
@@ -85,6 +86,13 @@ app.post('/api/persons', (request, response) => {
   if (!body.name || !body.number) {
     return response.status(400).json({ 
       error: 'content missing' 
+    })
+  }
+
+  /* Tarkistetaan, että nimi on uniikki */
+  if (phonebook.some(person => person.name === body.name)) {
+    return response.status(400).json({ 
+      error: 'name must be unique' 
     })
   }
 
