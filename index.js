@@ -1,10 +1,14 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 
 /* Middleware */
 app.use(express.json())
+
+/* Sallitaan CORS */
+app.use(cors())
 
 /*
 app.use(morgan('tiny'))
@@ -127,14 +131,14 @@ app.post('/api/persons', (request, response) => {
   phonebook = phonebook.concat(person) 
 
   /* Vastataan uudella henkilöllä */
-  response.json(phonebook)
+  response.json(person)
 })
 
 /* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
 app.use(unknownEndpoint)
 
 /* Portti */
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
