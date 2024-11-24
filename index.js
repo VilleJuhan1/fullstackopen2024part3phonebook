@@ -1,7 +1,22 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
+/* Middleware */
 app.use(express.json())
+
+/*
+app.use(morgan('tiny'))
+*/
+
+/* Logataan myös pyynnön mukana tuleva data */
+morgan.token('body', (req) => {
+  return JSON.stringify(req.body) || '';
+});
+
+/* Logataan pyynnön tiedot */
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 /* Alustetaan puhelinluettelo */
 let phonebook = [
@@ -27,22 +42,10 @@ let phonebook = [
   }
 ]
 
-/* Logataan pyynnöt konsoliin */
-const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
-  console.log('Path:  ', request.path)
-  console.log('Body:  ', request.body)
-  console.log('---')
-  next()
-}
-
 /* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
-
-/* Käytetään requestLoggeria jokaisessa pyynnössä */
-app.use(requestLogger)
 
 /* Juuresta saadaan vastauksena Hello World! */
 app.get('/', (request, response) => {
