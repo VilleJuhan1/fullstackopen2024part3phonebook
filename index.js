@@ -27,6 +27,23 @@ let phonebook = [
   }
 ]
 
+/* Logataan pyynnöt konsoliin */
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+
+/* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+/* Käytetään requestLoggeria jokaisessa pyynnössä */
+app.use(requestLogger)
+
 /* Juuresta saadaan vastauksena Hello World! */
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
@@ -109,6 +126,9 @@ app.post('/api/persons', (request, response) => {
   /* Vastataan uudella henkilöllä */
   response.json(phonebook)
 })
+
+/* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
+app.use(unknownEndpoint)
 
 /* Portti */
 const PORT = 3001
