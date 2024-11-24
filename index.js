@@ -10,6 +10,8 @@ app.use(express.json())
 /* Sallitaan CORS */
 app.use(cors())
 
+app.use(express.static('dist'))
+
 /*
 app.use(morgan('tiny'))
 */
