@@ -107,6 +107,7 @@ const generateId = () => {
 /* Lisätään uusi henkilö */
 app.post('/api/persons', (request, response) => {
   const body = request.body
+  /*console.log("POST request on", body)*/
 
   /* Tarkistetaan, että nimi ja numero on annettu */
   if (!body.name || !body.number) {
