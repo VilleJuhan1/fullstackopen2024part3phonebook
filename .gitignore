@@ -5,3 +5,4 @@ Dockerfile
 .github/
 .env
 .index_copy.js
+.gitignore
