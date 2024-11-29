@@ -1,5 +1,8 @@
+/* Vain testaamiseen käytettävä tiedosto, joka lisää tietokantaan uuden henkilön tai tulostaa kaikki tietokannassa olevat henkilöt */
+
 const mongoose = require('mongoose')
 
+/*Jos salasanaa ei ole annettu, tulostetaan virheilmoitus*/
 if (process.argv.length<3) {
   console.log('tietokantayhteys vaatii vähintään salasanan toimiakseen')
   process.exit(1)

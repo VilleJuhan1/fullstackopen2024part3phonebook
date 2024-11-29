@@ -2,10 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 
-require('dotenv').config()
-
 const app = express()
-const People = require('./models/people')
 
 /* Middleware */
 app.use(express.json())
@@ -27,6 +24,30 @@ morgan.token('body', (req) => {
 /* Logataan pyynnön tiedot */
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
+/* Alustetaan puhelinluettelo */
+let phonebook = [
+  { 
+    "name": "Arto Hellas", 
+    "number": "040-123456",
+    "id": "1"
+  },
+  { 
+    "name": "Ada Lovelace", 
+    "number": "39-44-5323523",
+    "id": "2"
+  },
+  { 
+    "name": "Dan Abramov", 
+    "number": "12-43-234345",
+    "id": "3"
+  },
+  { 
+    "name": "Mary Poppendieck", 
+    "number": "39-23-6423122",
+    "id": "4"
+  }
+]
+
 /* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
@@ -39,22 +60,17 @@ app.get('/', (request, response) => {
 
 /* Puhelinluettelon tiedot */
 app.get('/api/persons', (request, response) => {
-  People.find({}).then(persons => {
-    response.json(persons)
-  })
+  response.json(phonebook)
 })
 
 /* Info-sivu */
 app.get('/info', (request, response) => {
-  People.countDocuments({}).then(count => {
-    const presentTime = new Date()
-    response.send(
-      `<p>Phonebook has info for ${count} people.</p>
-       <p>${presentTime}</p>`
-    )
-  }).catch(error => {
-    response.status(500).send({ error: 'something went wrong' })
-  })
+  const phonebookLength = phonebook.length
+  const presentTime = new Date()
+  response.send(
+    `<p>Phonebook has info for ${phonebookLength} people</p>
+     <p>${presentTime}</p>`
+  )
 })
 
 /* Yksittäisen henkilön tiedot */
@@ -70,21 +86,28 @@ app.get('/api/persons/:id', (request, response) => {
   }
 })
 
-/* Luodaan satunnainen ID-numero väliltä 1024 - 8192 ja tarkistetaan, että sitä ei ole jo
-// Tätä ei tarvita tietokantaa käyttävässä versiossa
+/* Poistetaan yksittäinen henkilö */
+app.delete('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  phonebook = phonebook.filter(person => person.id !== id)
+
+  response.status(204).end()
+})
+
+/* Luodaan satunnainen ID-numero väliltä 1024 - 8192 ja tarkistetaan, että sitä ei ole jo*/
 const generateId = () => {
   let newId
-  // Generoidaan uusi ID
+  /* Generoidaan uusi ID */
   do {
     newId = Math.floor(Math.random() * (8192 - 1024 + 1)) + 1024
-  } while (phonebook.some(person => person.id === String(newId))) // Tarkistetaan, että ID ei ole jo olemassa
+  } while (phonebook.some(person => person.id === String(newId))) /* Tarkistetaan, että ID ei ole jo olemassa */
   return String(newId)
 }
-*/
 
 /* Lisätään uusi henkilö */
 app.post('/api/persons', (request, response) => {
   const body = request.body
+  /*console.log("POST request on", body)*/
 
   /* Tarkistetaan, että nimi ja numero on annettu */
   if (!body.name || !body.number) {
@@ -94,39 +117,24 @@ app.post('/api/persons', (request, response) => {
   }
 
   /* Tarkistetaan, että nimi on uniikki */
-  People.findOne({ name: body.name }).then(existingPerson => {
-    if (existingPerson) {
-      return response.status(400).json({ 
-        error: 'name must be unique' 
-      })
-    }
-
-    /* Luodaan uusi henkilö */
-    const person = new People({
-      name: body.name,
-      number: body.number,
+  if (phonebook.some(person => person.name === body.name)) {
+    return response.status(400).json({ 
+      error: 'name must be unique' 
     })
+  }
 
-    /* Tallennetaan henkilö tietokantaan */
-    person.save().then(savedPerson => {
-      response.json(savedPerson)
-    }).catch(error => {
-      response.status(500).json({ error: 'something went wrong in person.save()' })
-    })
-  }).catch(error => {
-    response.status(500).json({ error: 'something went wrong in People.findOne()' })
-  })
-})
+  /* Luodaan uusi henkilö */
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId(),
+  }
 
-/* Poistetaan yksittäinen henkilö */
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  //phonebook = phonebook.filter(person => person.id !== id)
-  People.deleteOne({ _id: id })
-  .then(result => console.log(result))
-  .catch(err => console.error(err));
+  /* Lisätään henkilö puhelinluetteloon */
+  phonebook = phonebook.concat(person) 
 
-  response.status(204).end()
+  /* Vastataan uudella henkilöllä */
+  response.json(person)
 })
 
 /* Jos pyydettyä osoitetta ei ole, palautetaan 404 */

@@ -1,8 +1,8 @@
 # Phonebook App
 
-This is the backend for the Phonebook application, which allows users to manage their contacts. The front is included but only in a production build.
+This is a fullstack phonebook app utilizing a separate cloud database running on MongoDB and a cloud deployed backend + front (Render). 
 
-The combined front+back application can be found here:
+The deployed application can be found here:
 https://full-stack-open-another-phonebook-app.onrender.com
 
 ## Features
@@ -16,7 +16,7 @@ https://full-stack-open-another-phonebook-app.onrender.com
 
 - Node.js
 - Express
-- MongoDB
+- MongoDB (yet to be implemented fully)
 
 ## Getting Started
 

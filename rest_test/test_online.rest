@@ -1,2 +1,2 @@
-GET https://osa3-puhelinluettelo-backend-thrumming-silence-809.fly.dev/api/persons
+GET http://localhost:3001/api/persons/
 Content-Type: application/json

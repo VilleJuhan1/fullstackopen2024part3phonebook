@@ -3,3 +3,5 @@ fly.toml
 Dockerfile
 .dockerignore
 .github/
+.env
+.index_copy.js
