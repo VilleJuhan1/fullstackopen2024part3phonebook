@@ -16,10 +16,8 @@ https://full-stack-open-another-phonebook-app.onrender.com
 
 - Node.js
 - Express
-- MongoDB (yet to be implemented fully)
+- MongoDB
 
-## Getting Started
+## Course requirements progress
 
-### Prerequisites
-
-### Installation
+- 3.14
