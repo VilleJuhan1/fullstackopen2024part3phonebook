@@ -6,3 +6,4 @@ Dockerfile
 .env
 .gitignore
 index_copy.js
+dist_backup/

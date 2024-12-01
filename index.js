@@ -26,21 +26,19 @@ morgan.token('body', (req) => {
 /* Logataan pyynnön tiedot */
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-/* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-/* Juuresta saadaan vastauksena Hello World! */
+/* Juuresta saadaan vastauksena Hello World! Fullstack-versiossa frontend hoitaa tämän.
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
+*/
 
 /* Puhelinluettelon tiedot */
-app.get('/api/persons', (request, response) => {
-  People.find({}).then(persons => {
-    response.json(persons)
-  })
+app.get('/api/persons', (request, response, next) => {
+  People.find({})
+    .then(persons => {
+      response.json(persons)
+    })
+    .catch(error => next(error))
 })
 
 /* Info-sivu */
@@ -51,38 +49,29 @@ app.get('/info', (request, response) => {
       `<p>Phonebook has info for ${count} people.</p>
        <p>${presentTime}</p>`
     )
-  }).catch(error => {
-    response.status(500).send({ error: 'something went wrong' })
-  })
+  //}).catch(error => {
+  //  response.status(500).send({ error: 'something went wrong' })
+  }).catch(error => next(error))
+  //})
 })
 
-/* Yksittäisen henkilön tiedot */
-app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  const person = phonebook.find(person => person.id === id)
-
-  /* Jos henkilö löytyy, palautetaan tiedot, muuten 404 */
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
+// Yksittäisen henkilön haku
+app.get('/api/persons/:id', (request, response, next) => {
+  People.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      // Jos henkilöä ei löydy, palautetaan 404
+      //} else {
+      //  response.status(404).end()
+      }
+    })
+    // Jos tulee virhe, siirrytään virheidenkäsittelijään
+    .catch(error => next(error))
 })
-
-/* Luodaan satunnainen ID-numero väliltä 1024 - 8192 ja tarkistetaan, että sitä ei ole jo
-// Tätä ei tarvita tietokantaa käyttävässä versiossa
-const generateId = () => {
-  let newId
-  // Generoidaan uusi ID
-  do {
-    newId = Math.floor(Math.random() * (8192 - 1024 + 1)) + 1024
-  } while (phonebook.some(person => person.id === String(newId))) // Tarkistetaan, että ID ei ole jo olemassa
-  return String(newId)
-}
-*/
 
 /* Lisätään uusi henkilö */
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   /* Tarkistetaan, että nimi ja numero on annettu */
@@ -109,27 +98,77 @@ app.post('/api/persons', (request, response) => {
     /* Tallennetaan henkilö tietokantaan */
     person.save().then(savedPerson => {
       response.json(savedPerson)
-    }).catch(error => {
-      response.status(500).json({ error: 'something went wrong in person.save()' })
+    }).catch(error => next(error))
+    //}).catch(error => {
+    //  response.status(500).json({ error: 'something went wrong in person.save()' })
+    //})
+  }).catch(error => next(error))
+  //}).catch(error => {
+  //  response.status(500).json({ error: 'something went wrong in People.findOne()' })
+  //})
+})
+
+/* Päivitetään yksittäisen henkilön tiedot */
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  People.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
+    .then(updatedPerson => {
+      if (updatedPerson) {
+        response.json(updatedPerson)
+      } else {
+        response.status(404).end()
+      }
     })
-  }).catch(error => {
-    response.status(500).json({ error: 'something went wrong in People.findOne()' })
-  })
+    .catch(error => next(error))
 })
 
 /* Poistetaan yksittäinen henkilö */
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
   //phonebook = phonebook.filter(person => person.id !== id)
   People.deleteOne({ _id: id })
   .then(result => console.log(result))
-  .catch(err => console.error(err));
+  //.catch(err => console.error(err))
+  .catch(error => next(error))
 
   response.status(204).end()
 })
 
-/* Jos pyydettyä osoitetta ei ole, palautetaan 404 */
+/* Siirretty errorHandleriin
+// Jos pyydettyä osoitetta ei ole, palautetaan 404
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+// Jos pyydettyä osoitetta ei ole, palautetaan 404
 app.use(unknownEndpoint)
+*/
+
+// Otetaan kiinni tietokannan palaute virheellisestä ID:stä
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else if (error.status === 404) {
+    return response.status(404).send({ error: 'unknown endpoint' })
+  }
+
+  return response.status(500).json({ error: 'something went wrong' })
+
+  // next(error)
+}
+
+// Käsitellään virheitä
+app.use(errorHandler)
 
 /* Portti */
 const PORT = process.env.PORT || 3001
