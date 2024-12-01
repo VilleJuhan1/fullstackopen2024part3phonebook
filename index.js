@@ -6,17 +6,9 @@ const People = require('./models/people')
 
 const app = express()
 
-/* Middleware */
 app.use(express.json())
-
-/* Sallitaan CORS */
 app.use(cors())
-
 app.use(express.static('dist'))
-
-/*
-app.use(morgan('tiny'))
-*/
 
 /* Logataan myös pyynnön mukana tuleva data */
 morgan.token('body', (req) => {
@@ -25,12 +17,6 @@ morgan.token('body', (req) => {
 
 /* Logataan pyynnön tiedot */
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-
-/* Juuresta saadaan vastauksena Hello World! Fullstack-versiossa frontend hoitaa tämän.
-app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
-})
-*/
 
 /* Puhelinluettelon tiedot */
 app.get('/api/persons', (request, response, next) => {
@@ -49,10 +35,7 @@ app.get('/info', (request, response, next) => {
       `<p>Phonebook has info for ${count} people.</p>
        <p>${presentTime}</p>`
     )
-  //}).catch(error => {
-  //  response.status(500).send({ error: 'something went wrong' })
   }).catch(error => next(error))
-  //})
 })
 
 // Yksittäisen henkilön haku
@@ -61,9 +44,6 @@ app.get('/api/persons/:id', (request, response, next) => {
     .then(person => {
       if (person) {
         response.json(person)
-      // Jos henkilöä ei löydy, palautetaan 404
-      //} else {
-      //  response.status(404).end()
       }
     })
     // Jos tulee virhe, siirrytään virheidenkäsittelijään
@@ -99,13 +79,7 @@ app.post('/api/persons', (request, response, next) => {
     person.save().then(savedPerson => {
       response.json(savedPerson)
     }).catch(error => next(error))
-    //}).catch(error => {
-    //  response.status(500).json({ error: 'something went wrong in person.save()' })
-    //})
   }).catch(error => next(error))
-  //}).catch(error => {
-  //  response.status(500).json({ error: 'something went wrong in People.findOne()' })
-  //})
 })
 
 /* Päivitetään yksittäisen henkilön tiedot */
@@ -117,6 +91,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     number: body.number,
   }
 
+  /* Päivitetään henkilön tiedot */
   People.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
       if (updatedPerson) {
@@ -131,27 +106,16 @@ app.put('/api/persons/:id', (request, response, next) => {
 /* Poistetaan yksittäinen henkilö */
 app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-  //phonebook = phonebook.filter(person => person.id !== id)
   People.deleteOne({ _id: id })
     .then(result => console.log(result))
-  //.catch(err => console.error(err))
     .catch(error => next(error))
 
   response.status(204).end()
 })
 
-/* Siirretty errorHandleriin
-// Jos pyydettyä osoitetta ei ole, palautetaan 404
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-// Jos pyydettyä osoitetta ei ole, palautetaan 404
-app.use(unknownEndpoint)
-*/
-
+/* eslint-disable no-unused-vars */
 // Otetaan kiinni tietokannan palaute virheellisestä ID:stä
-const errorHandler = (error, request, response, /*next*/) => {
+const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
@@ -163,9 +127,9 @@ const errorHandler = (error, request, response, /*next*/) => {
   }
 
   return response.status(500).json({ error: 'something went wrong' })
-
   // next(error)
 }
+/* eslint-enable no-unused-vars */
 
 // Käsitellään virheitä
 app.use(errorHandler)
