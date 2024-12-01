@@ -5,5 +5,5 @@ Dockerfile
 .github/
 .env
 .gitignore
-index_copy.js
+backup.js
 dist_backup/
