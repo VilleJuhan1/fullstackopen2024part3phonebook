@@ -15,6 +15,7 @@ Disclaimer for course work review: Visual Studio Code Copilot-plugin was used as
 
 - Add new contacts
 - View all contacts
+- Filter contacts
 - Update existing contacts
 - Delete contacts
 
