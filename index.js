@@ -20,8 +20,8 @@ app.use(morgan('tiny'))
 
 /* Logataan myös pyynnön mukana tuleva data */
 morgan.token('body', (req) => {
-  return JSON.stringify(req.body) || '';
-});
+  return JSON.stringify(req.body) || ''
+})
 
 /* Logataan pyynnön tiedot */
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -42,7 +42,7 @@ app.get('/api/persons', (request, response, next) => {
 })
 
 /* Info-sivu */
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
   People.countDocuments({}).then(count => {
     const presentTime = new Date()
     response.send(
@@ -76,16 +76,16 @@ app.post('/api/persons', (request, response, next) => {
 
   /* Tarkistetaan, että nimi ja numero on annettu */
   if (!body.name || !body.number) {
-    return response.status(400).json({ 
-      error: 'content missing' 
+    return response.status(400).json({
+      error: 'content missing'
     })
   }
 
   /* Tarkistetaan, että nimi on uniikki */
   People.findOne({ name: body.name }).then(existingPerson => {
     if (existingPerson) {
-      return response.status(400).json({ 
-        error: 'name must be unique' 
+      return response.status(400).json({
+        error: 'name must be unique'
       })
     }
 
@@ -133,9 +133,9 @@ app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
   //phonebook = phonebook.filter(person => person.id !== id)
   People.deleteOne({ _id: id })
-  .then(result => console.log(result))
+    .then(result => console.log(result))
   //.catch(err => console.error(err))
-  .catch(error => next(error))
+    .catch(error => next(error))
 
   response.status(204).end()
 })
@@ -151,7 +151,7 @@ app.use(unknownEndpoint)
 */
 
 // Otetaan kiinni tietokannan palaute virheellisestä ID:stä
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, request, response, /*next*/) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
