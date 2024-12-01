@@ -31,8 +31,7 @@ To install and run the project on your local machine, follow these steps:
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/FullStack2024.git
-    cd FullStack2024/osa3_puhelinluettelo_backend
+    git clone https://github.com/VilleJuhan1/fullstackopen2024part3phonebook
     ```
 
 2. **Install dependencies:**
@@ -54,5 +53,3 @@ To install and run the project on your local machine, follow these steps:
 
 5. **Access the application:**
     Open your browser and go to `http://localhost:3001`
-
-Now you should have the Phonebook App running on your local machine.
