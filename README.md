@@ -11,7 +11,6 @@ Disclaimer for course work review: Visual Studio Code Copilot-plugin was used as
 
 - All exercises done up to 3.22
 
-
 ## Features
 
 - Add new contacts
