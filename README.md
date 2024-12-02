@@ -15,6 +15,7 @@ Disclaimer for course work review: Visual Studio Code Copilot-plugin was used as
 
 - Add new contacts
 - View all contacts
+- Filter contacts
 - Update existing contacts
 - Delete contacts
 
@@ -30,7 +31,7 @@ To install and run the project on your local machine, follow these steps:
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/VilleJuhan1/fullstackopen2024part3phonebook
+    git clone https://github.com/VilleJuhan1/fullstackopen2024part3phonebook.git
     ```
 
 2. **Install dependencies:**
